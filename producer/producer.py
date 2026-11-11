@@ -35,6 +35,18 @@ def delivery_report(err, msg):
 def generate_transaction():
     user_id = random.choice(USERS)
 
+    # 5% corrupted data to prove our PySpark Dead Letter Queue (DLQ) catches errors
+    if random.random() < 0.05:
+        return {
+            "transaction_id": fake.uuid4(),
+            "user_id": user_id,
+            "amount": -999,  # Invalid negative amount!
+            "currency": "INR",
+            "card_type": "credit",
+            "city": None,    # Missing city!
+            "timestamp": datetime.now().isoformat()
+        }
+
     # 90% normal transactions and 10% fraudulent spikes
     is_spike = random.random() < 0.10
     if is_spike:
